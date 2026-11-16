@@ -1,0 +1,32 @@
+# Target shape of a TuxLoad replay script.
+# This file is not runnable. The replay engine is built after discovery
+# confirms the 64-bit Tuxedo client library and the buffer types.
+
+name: CustomerInquiry
+connection:
+  wsnaddr: "//tuxhost:4000"
+  fieldTables:
+    - cust.fml32
+parameters:
+  customer:
+    file: customers.csv
+    mode: unique
+transactions:
+  - name: T01_GetCustomer
+    call:
+      service: CUST_INQ
+      buffer: FML32
+      fields:
+        CUST_ID: "{{customer.id}}"
+        CHANNEL: "IVR"
+    extract:
+      account_no: "ACCT_NO[0]"
+    checks:
+      tperrno: 0
+  - think: 2s
+  - name: T02_GetBalance
+    call:
+      service: ACCT_BAL
+      buffer: FML32
+      fields:
+        ACCT_NO: "{{account_no}}"
